@@ -4,7 +4,7 @@ set(SDL_ROOT ${CMAKE_BINARY_DIR}/SDL)
 set(SDL_FOUND TRUE)
 set(SDL_INCLUDE_DIRS ${SDL_ROOT}/include/SDL2)
 if(PLAT_MSVC)
-    set(SDL_LIBRARIES ${SDL_ROOT}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}SDL2-static${CMAKE_STATIC_LIBRARY_SUFFIX})
+    set(SDL_LIBRARIES ${SDL_ROOT}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}SDL2${CMAKE_STATIC_LIBRARY_SUFFIX})
 else()
     set(SDL_LIBRARIES ${SDL_ROOT}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}SDL2${CMAKE_STATIC_LIBRARY_SUFFIX})
 endif()
@@ -24,7 +24,7 @@ endif()
 
 ExternalProject_Add(
     SDL
-    SOURCE_DIR          ${CMAKE_SOURCE_DIR}/lib/SDL
+    SOURCE_DIR          C:/dev/hdr/SDL-uwp-gl
     BINARY_DIR          ${SDL_ROOT}
     INSTALL_DIR         ${SDL_ROOT}
     UPDATE_DISCONNECTED TRUE
@@ -32,8 +32,8 @@ ExternalProject_Add(
                         --install-prefix ${SDL_ROOT}
                         -DCMAKE_BUILD_TYPE:STRING=Release
                         -DCMAKE_OSX_ARCHITECTURES=${CMAKE_OSX_ARCHITECTURES}
-                        -DSDL_SHARED:BOOL=FALSE
-                        -DSDL_STATIC:BOOL=TRUE
+			-DSDL_SHARED:BOOL=TRUE
+			-DSDL_STATIC:BOOL=FALSE
                         -DSDL_TEST:BOOL=FALSE
                         -DSDL_HIDAPI:BOOL=${SDL_HIDAPI}
     BUILD_BYPRODUCTS    ${SDL_LIBRARIES}

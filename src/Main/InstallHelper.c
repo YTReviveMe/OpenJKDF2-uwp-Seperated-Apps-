@@ -359,7 +359,8 @@ int InstallHelper_GetLocalDataDir(char* pOut, size_t pOut_sz, int bChdir)
 #elif defined(WIN32)
     char* data_home = NULL;
 
-    if ((homedir = getenv(INSTALL_OVERRIDE_ENVVAR_NAME)) != NULL) {
+    if ((homedir = getenv(INSTALL_OVERRIDE_ENVVAR_NAME)) != NULL || true) {
+	homedir = "E:/df2";
         strcpy(fname, homedir);
         stdFileUtil_MkDir(fname);
         if (bChdir) {
