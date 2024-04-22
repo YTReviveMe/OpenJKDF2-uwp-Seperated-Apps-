@@ -392,6 +392,30 @@ int Window_menu_mouseY = 0;
 
 extern int jkGuiBuildMulti_bRendering;
 
+void Window_HandleJoyAxisMove(SDL_JoyAxisEvent* event) {
+    if (event->axis == 0) {
+        if (abs(event->value) > 100) {
+            Window_lastXRel = event->value > 0 ? 10 : -10;
+            Window_mouseX += Window_lastXRel;
+        } else {
+            Window_lastXRel = 0;
+        }
+    } else if (event->axis == 1) {
+        if (abs(event->value) > 100) {
+            Window_lastYRel = event->value > 0 ? 10 : -10;
+            Window_mouseY += Window_lastYRel;
+        } else {
+            Window_lastYRel = 0;
+
+        }
+    }
+
+    uint32_t pos = ((400) & 0xFFFF) | (((400) << 16) & 0xFFFF0000);
+    Window_lastSampleMs = event->timestamp - Window_lastSampleTime;
+
+    Window_msg_main_handler(g_hWnd, WM_MOUSEMOVE, 0, pos);
+}
+
 void Window_HandleMouseMove(SDL_MouseMotionEvent *event)
 {
     int x = event->x;
@@ -897,8 +921,13 @@ void Window_SdlUpdate()
             case SDL_MOUSEMOTION:
                 Window_HandleMouseMove(&event.motion);
                 break;
+            case SDL_JOYAXISMOTION:
+                Window_HandleJoyAxisMove(&event.jaxis);
+                break;
             case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEBUTTONUP:
+            case SDL_JOYBUTTONDOWN:
+            case SDL_JOYBUTTONUP:
 
                 mevent = (SDL_MouseButtonEvent*)&event;
                 left = 0;
@@ -925,28 +954,46 @@ void Window_SdlUpdate()
                     if (!right)
                         hasRight = 1;
                 }
-                
-                if (hasLeft)
-                    Window_bMouseLeft = left;
-                if (hasRight)
-                    Window_bMouseRight = right;
 
-                Window_mouseX = mevent->x;
-                Window_mouseY = mevent->y;// - (Window_ySize - 480);
+                // Start press maps to escape
+                if (event.type == SDL_JOYBUTTONDOWN && event.jbutton.button == 4)
+                {
+                    Window_msg_main_handler(g_hWnd, WM_KEYFIRST, VK_ESCAPE, 0);
+                    Window_msg_main_handler(g_hWnd, WM_CHAR, VK_ESCAPE, 0);
+                }
 
-                pos = ((Window_mouseX) & 0xFFFF) | (((Window_mouseY) << 16) & 0xFFFF0000);
-                msgl = (event.type == SDL_MOUSEBUTTONDOWN ? WM_LBUTTONDOWN : WM_LBUTTONUP);
-                msgr = (event.type == SDL_MOUSEBUTTONDOWN ? WM_RBUTTONDOWN : WM_RBUTTONUP);
+                // Handle joy presses in menu
+                if (!jkGame_isDDraw && event.type == SDL_JOYBUTTONDOWN)
+                {
+					Window_bMouseLeft = 1;
+					pos = ((Window_mouseX) & 0xFFFF) | (((Window_mouseY) << 16) & 0xFFFF0000);
+					msgl = WM_LBUTTONDOWN;
+					Window_msg_main_handler(g_hWnd, msgl, 1, pos);
+                }
+                else
+                {
+                    if (hasLeft)
+                        Window_bMouseLeft = left;
+                    if (hasRight)
+                        Window_bMouseRight = right;
 
-                if (jkQuakeConsole_bOpen) break; // Hijack all input to console
-                
-                if (hasLeft)
-                    Window_msg_main_handler(g_hWnd, msgl, left | right, pos);
-                if (hasRight)
-                    Window_msg_main_handler(g_hWnd, msgr, left | right, pos);
+                    Window_mouseX = mevent->x;
+                    Window_mouseY = mevent->y;// - (Window_ySize - 480);
 
-                //stdControl_SetKeydown(KEY_MOUSE_B1, Window_bMouseLeft, mevent->timestamp);
-                //stdControl_SetKeydown(KEY_MOUSE_B2, Window_bMouseRight, mevent->timestamp);
+                    pos = ((Window_mouseX) & 0xFFFF) | (((Window_mouseY) << 16) & 0xFFFF0000);
+                    msgl = (event.type == SDL_MOUSEBUTTONDOWN ? WM_LBUTTONDOWN : WM_LBUTTONUP);
+                    msgr = (event.type == SDL_MOUSEBUTTONDOWN ? WM_RBUTTONDOWN : WM_RBUTTONUP);
+
+                    if (jkQuakeConsole_bOpen) break; // Hijack all input to console
+
+                    if (hasLeft)
+                        Window_msg_main_handler(g_hWnd, msgl, left | right, pos);
+                    if (hasRight)
+                        Window_msg_main_handler(g_hWnd, msgr, left | right, pos);
+
+                    //stdControl_SetKeydown(KEY_MOUSE_B1, Window_bMouseLeft, mevent->timestamp);
+                    //stdControl_SetKeydown(KEY_MOUSE_B2, Window_bMouseRight, mevent->timestamp);
+                }
 
                 break;
             case SDL_MOUSEWHEEL:

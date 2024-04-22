@@ -208,24 +208,47 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Link>
-      <AdditionalDependencies>d3d12.lib;dxgi.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>
+		onecore.lib;
+		C:\lib\opengl32.lib;
+		C:\lib\libgallium_wgl.lib;
+		C:\lib\z.lib;
+		C:\dev\uwp\deps\SDL_image\lib\SDL_image.lib;
+		$(ProjectDir)\..\build_winrt\openal\Debug\common.lib;
+		$(ProjectDir)\..\build_winrt\openal\Debug\OpenAL32.lib;
+		$(ProjectDir)\..\build_winrt\glew\lib\glew.lib;
+		$(ProjectDir)\..\build_winrt\zlib\Windows\AMD64\lib\zlibstatic.lib;
+		$(ProjectDir)\..\build_winrt\libpng\lib\libpng16_static.lib;
+		$(ProjectDir)\..\build_winrt\SDL_mixer\lib\ogg.lib;
+		$(ProjectDir)\..\build_winrt\SDL_mixer\lib\opus.lib;
+		$(ProjectDir)\..\build_winrt\SDL_mixer\lib\opusfile.lib;
+		$(ProjectDir)\..\build_winrt\SDL_mixer\lib\vorbis.lib;
+		$(ProjectDir)\..\build_winrt\SDL_mixer\lib\vorbisfile.lib;
+		$(ProjectDir)\..\build_winrt\SDL_mixer\lib\SDL2_mixer-static.lib;
+		C:\dev\hdr\SDL-uwp-gl\VisualC-WinRT\x64\Release\SDL-UWP\SDL2.lib;
+		$(ProjectDir)\..\build_winrt\Debug\openjkdf2-64.lib;
+
+			    d3d12.lib;dxgi.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories); $(VCInstallDir)\lib\store\amd64; $(VCInstallDir)\lib\amd64</AdditionalLibraryDirectories>
     </Link>
     <ClCompile>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)pch.pch</PrecompiledHeaderOutputFile>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(IntermediateOutputPath);C:\dev\hdr\SDL-uwp-gl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Link>
-	    <AdditionalDependencies>
+      <AdditionalDependencies>
 		onecore.lib;
 		C:\lib\opengl32.lib;
 		C:\lib\libgallium_wgl.lib;
 		C:\lib\z.lib;
+		C:\dev\uwp\deps\SDL_image\lib\SDL_image.lib;
 		$(ProjectDir)\..\build_winrt\openal\Release\common.lib;
 		$(ProjectDir)\..\build_winrt\openal\Release\OpenAL32.lib;
 		$(ProjectDir)\..\build_winrt\glew\lib\glew.lib;
@@ -237,7 +260,6 @@
 		$(ProjectDir)\..\build_winrt\SDL_mixer\lib\vorbis.lib;
 		$(ProjectDir)\..\build_winrt\SDL_mixer\lib\vorbisfile.lib;
 		$(ProjectDir)\..\build_winrt\SDL_mixer\lib\SDL2_mixer-static.lib;
-		$(ProjectDir)\..\build_winrt\Release\openjkdf2-64.lib;
 		C:\dev\hdr\SDL-uwp-gl\VisualC-WinRT\x64\Release\SDL-UWP\SDL2.lib;
 		$(ProjectDir)\..\build_winrt\Release\openjkdf2-64.lib;
 			    d3d12.lib;dxgi.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -246,7 +268,10 @@
     <ClCompile>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)pch.pch</PrecompiledHeaderOutputFile>
-      <AdditionalIncludeDirectories>$(ProjectDir);C:\dev\hdr\SDL-uwp-gl\include;$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);
+	      C:\dev\uwp\deps\SDL_image\include;
+	      C:\dev\hdr\SDL-uwp-gl\include;
+	      $(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
@@ -277,17 +302,20 @@
     <Import Project="$(VSINSTALLDIR)\Common7\IDE\Extensions\Microsoft\VsGraphics\ShaderGraphContentTask.targets" />
   </ImportGroup>
   <ItemGroup>
+    <Content Include="C:\dev\uwp\deps\SDL_image\VisualC-WinRT\x64\Release\SDL_image-UWP\SDL2_image.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <Content Include="C:\dev\hdr\SDL-uwp-gl\VisualC-WinRT\x64\Release\SDL-UWP\SDL2.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-
   <ItemGroup>
     <Content Include="C:\dev\hdr\dhewm3-libs\x86_64-w64-mingw32\bin\OpenAL32.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-
   <ItemGroup>
     <Content Include="C:\bin\libgallium_wgl.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -318,5 +346,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-
+  <ItemGroup>
+    <Content Include="$(ProjectDir)\cursor_small.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>
