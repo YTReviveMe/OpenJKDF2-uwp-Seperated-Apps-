@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 #include "types.h"
+#include "GL/glew.h"
 
 void* jkgm_alloc_aligned(size_t amt);
 void jkgm_aligned_free(void* p);
@@ -18,6 +19,7 @@ void jkgm_populate_shortcuts(stdVBuffer *vbuf, rdDDrawSurface *texture, rdMateri
 int jkgm_std3D_AddToTextureCache(stdVBuffer *vbuf, rdDDrawSurface *texture, int is_alpha_tex, int no_alpha, rdMaterial* material, int cel);
 void jkgm_free_cache_entry(jkgm_cache_entry_t* entry);
 void jkgm_write_png(const char *pFname, int width, int height, uint8_t* paFramebuffer);
+int jkgm_load_png(const char* name, int* outWidth, int* outHeight, int* outHasAlpha, GLubyte** outData, int flip_bgr);
 
 #endif // ARCH_WASM
 #endif //SDL2_RENDER

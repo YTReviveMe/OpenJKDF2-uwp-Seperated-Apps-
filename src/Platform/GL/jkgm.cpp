@@ -91,6 +91,9 @@ void print_hash(uint8_t *p){
     stdPlatform_Printf("\n");
 }
 
+
+
+
 bool loadPngImage(const char *name, int* outWidth, int* outHeight, int* outHasAlpha, GLubyte **outData, int flip_bgr) {
     png_structp png_ptr = NULL;
     png_infop info_ptr = NULL;
@@ -296,6 +299,11 @@ bool loadPngImage(const char *name, int* outWidth, int* outHeight, int* outHasAl
  
     /* That's it */
     return true;
+}
+
+// Wrapper for png load since it's a pain to export the other function
+int jkgm_load_png(const char* name, int* outWidth, int* outHeight, int* outHasAlpha, GLubyte** outData, int flip_bgr) {
+    return loadPngImage(name, outWidth, outHeight, outHasAlpha, outData, flip_bgr);
 }
 }
 

@@ -19,8 +19,12 @@
 #include "Platform/GL/jkgm.h"
 
 #include "SDL2_helper.h"
+extern __declspec(dllimport) SDL_Surface * IMG_Load(const char* file);
+
+#include "Gui/jkGUIRend.h"
 
 #ifdef WIN32
+#include <Windows.h>
 // Force Optimus/AMD to use non-integrated GPUs by default.
 __declspec(dllexport) DWORD NvOptimusEnablement = 1;
 __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
@@ -92,6 +96,8 @@ typedef struct std3DFramebuffer
     int32_t h;
 } std3DFramebuffer;
 
+static int mouseX, mouseY;
+SDL_Surface* cursorSurface;
 GLint std3D_windowFbo = 0;
 std3DFramebuffer std3D_framebuffers[2];
 std3DFramebuffer *std3D_pFb = NULL;
@@ -118,7 +124,7 @@ std3DSimpleTexStage std3D_blurStage;
 std3DSimpleTexStage std3D_ssaoStage;
 std3DSimpleTexStage std3D_ssaoMixStage;
 
-GLuint blank_tex, blank_tex_white;
+GLuint blank_tex, blank_tex_white, cursor_tex;
 void* blank_data = NULL, *blank_data_white = NULL;
 GLuint worldpal_texture;
 void* worldpal_data = NULL;
@@ -650,6 +656,18 @@ int std3D_Startup()
     jkgm_startup();
 #endif
 
+    // Init software cursor texture
+    GLubyte* cursorImage;
+    int cursorWidth, cursorHeight, hasAlpha;
+    // TODO: Need a helper to get app bundle path
+    cursorSurface = IMG_Load("Q:\\Users\\UserMgr0\\AppData\\Local\\Packages\\4892edf8-debd-49c0-a003-62355d8fa04d_vfvyvkbgajpwg\\LocalState\\cursor_small.png");
+    //jkgm_load_png("Q:\\Users\\UserMgr0\\AppData\\Local\\Packages\\4892edf8-debd-49c0-a003-62355d8fa04d_vfvyvkbgajpwg\\LocalState\\cursor_small.png", &cursorWidth, &cursorHeight, &hasAlpha, &cursorImage, 0);
+
+    glGenTextures(1, &cursor_tex);
+    glBindTexture(GL_TEXTURE_2D, cursor_tex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 64, 64, 0, GL_RGBA, GL_UNSIGNED_BYTE, cursorSurface->pixels);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
     memset(&std3D_ui_colormap, 0, sizeof(std3D_ui_colormap));
     rdColormap_LoadEntry("misc\\cmp\\UIColormap.cmp", &std3D_ui_colormap);
 
@@ -1072,6 +1090,7 @@ void std3D_DrawMenuSubrect2(float x, float y, float w, float h, float dstX, floa
 static rdDDrawSurface* test_idk = NULL;
 void std3D_DrawSimpleTex(std3DSimpleTexStage* pStage, std3DIntermediateFbo* pFbo, GLuint texId, GLuint texId2, GLuint texId3, float param1, float param2, float param3, int gen_mips);
 void std3D_DrawMapOverlay();
+void std3D_DrawSoftwareCursor();
 void std3D_DrawUIRenderList();
 
 void std3D_DrawMenu()
@@ -1327,6 +1346,12 @@ void std3D_DrawMenu()
     glBindTexture(GL_TEXTURE_2D, Video_menuTexId);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Video_menuBuffer.format.width, Video_menuBuffer.format.height, GL_RED, GL_UNSIGNED_BYTE, Video_menuBuffer.sdlSurface->pixels);
 
+    // This produces a "red" version of the cursor with no alpha I guess because the target texture is red?
+	//jkGuiRend_GetMousePos(&mouseX, &mouseY);
+    //glActiveTexture(GL_TEXTURE0 + cursorTex);
+    //glBindTexture(GL_TEXTURE_2D, cursorTex);
+    //glTexSubImage2D(GL_TEXTURE_2D, 0, mouseX, mouseY, 64, 64, GL_RGBA, GL_UNSIGNED_BYTE, cursorSurface->pixels);
+
     //GLushort data_elements[32 * 3];
     glActiveTexture(GL_TEXTURE0 + 1);
     glBindTexture(GL_TEXTURE_2D, displaypal_texture);
@@ -1428,7 +1453,15 @@ void std3D_DrawMenu()
     std3D_DrawMapOverlay();
     std3D_DrawUIRenderList();
 
+    
+    
+
     last_flags = 0;
+}
+
+void std3D_DrawSoftwareCursor()
+{
+
 }
 
 void std3D_DrawMapOverlay()
@@ -1447,10 +1480,7 @@ void std3D_DrawMapOverlay()
     float menu_w = (double)Window_xSize;
     float menu_h = (double)Window_ySize;
 
-    if (!jkGame_isDDraw)
-    {
-        return;
-    }
+    
 
     menu_w = Video_menuBuffer.format.width;
     menu_h = Video_menuBuffer.format.height;
@@ -1472,9 +1502,21 @@ void std3D_DrawMapOverlay()
     glActiveTexture(GL_TEXTURE0 + 0);
     glBindTexture(GL_TEXTURE_2D, blank_tex);
     
-    glActiveTexture(GL_TEXTURE0 + 0);
-    glBindTexture(GL_TEXTURE_2D, Video_overlayTexId);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Video_overlayMapBuffer.format.width, Video_overlayMapBuffer.format.height, GL_RED, GL_UNSIGNED_BYTE, Video_overlayMapBuffer.sdlSurface->pixels);
+    if (!jkGame_isDDraw)
+    {
+        // Software cursor inject
+        jkGuiRend_GetMousePos(&mouseX, &mouseY);
+        glActiveTexture(GL_TEXTURE0 + 0);
+        glBindTexture(GL_TEXTURE_2D, Video_overlayTexId);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, mouseX, mouseY, 64, 64, GL_RGBA, GL_UNSIGNED_BYTE, cursorSurface->pixels);
+
+    }
+    else
+    {
+        glActiveTexture(GL_TEXTURE0 + 0);
+        glBindTexture(GL_TEXTURE_2D, Video_overlayTexId);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Video_overlayMapBuffer.format.width, Video_overlayMapBuffer.format.height, GL_RED, GL_UNSIGNED_BYTE, Video_overlayMapBuffer.sdlSurface->pixels);
+    }
 
     glActiveTexture(GL_TEXTURE0 + 1);
     glBindTexture(GL_TEXTURE_2D, displaypal_texture);
