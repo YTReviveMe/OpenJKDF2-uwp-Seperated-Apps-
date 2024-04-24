@@ -966,7 +966,8 @@ void Window_SdlUpdate()
 					Window_bMouseLeft = 1;
 					pos = ((Window_mouseX) & 0xFFFF) | (((Window_mouseY) << 16) & 0xFFFF0000);
 					msgl = WM_LBUTTONDOWN;
-					Window_msg_main_handler(g_hWnd, msgl, 1, pos);
+					Window_msg_main_handler(g_hWnd, WM_LBUTTONDOWN, 1, pos);
+					Window_msg_main_handler(g_hWnd, WM_LBUTTONUP, 1, pos);
                 }
                 else
                 {
