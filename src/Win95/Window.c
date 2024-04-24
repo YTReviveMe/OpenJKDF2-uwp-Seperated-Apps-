@@ -399,13 +399,13 @@ int Window_virtualMouseDY = 0;
 extern int jkGuiBuildMulti_bRendering;
 
 void Window_HandleJoyAxisMove(SDL_JoyAxisEvent* event) {
-    if (event->axis == 0) {
+    if (event->axis == SDL_CONTROLLER_AXIS_LEFTY) {
         if (abs(event->value) > 2000) {
-            Window_virtualMouseDY = event->value > 0 ? -10 : 10;
+            Window_virtualMouseDY = event->value > 0 ? 10 : -10;
         } else {
             Window_virtualMouseDY = 0;
         }
-    } else if (event->axis == 1) {
+    } else if (event->axis == SDL_CONTROLLER_AXIS_LEFTX) {
         if (abs(event->value) > 2000) {
             Window_virtualMouseDX = event->value > 0 ? 10 : -10;
         } else {
@@ -740,11 +740,11 @@ void Window_SdlUpdate()
     {
         switch (event.type)
         {
-            case SDL_JOYDEVICEADDED: {
+            case SDL_CONTROLLERDEVICEADDED: {
                 stdControl_InitSdlJoysticks();
                 break;
             }
-            case SDL_JOYDEVICEREMOVED: {
+            case SDL_CONTROLLERDEVICEREMOVED: {
                 stdControl_InitSdlJoysticks();
                 break;
             }
@@ -919,13 +919,13 @@ void Window_SdlUpdate()
             case SDL_MOUSEMOTION:
                 Window_HandleMouseMove(&event.motion);
                 break;
-            case SDL_JOYAXISMOTION:
-                Window_HandleJoyAxisMove(&event.jaxis);
+            case SDL_CONTROLLERAXISMOTION:
+                Window_HandleJoyAxisMove(&event.caxis);
                 break;
             case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEBUTTONUP:
-            case SDL_JOYBUTTONDOWN:
-            case SDL_JOYBUTTONUP:
+            case SDL_CONTROLLERBUTTONDOWN:
+            case SDL_CONTROLLERBUTTONUP:
 
                 mevent = (SDL_MouseButtonEvent*)&event;
                 left = 0;
@@ -954,14 +954,14 @@ void Window_SdlUpdate()
                 }
 
                 // Start press maps to escape
-                if (event.type == SDL_JOYBUTTONDOWN && event.jbutton.button == 4)
+                if (event.type == SDL_CONTROLLERBUTTONDOWN && event.cbutton.button == SDL_CONTROLLER_BUTTON_START)
                 {
                     Window_msg_main_handler(g_hWnd, WM_KEYFIRST, VK_ESCAPE, 0);
                     Window_msg_main_handler(g_hWnd, WM_CHAR, VK_ESCAPE, 0);
                 }
 
-                // Handle joy presses in menu
-                if (!jkGame_isDDraw && event.type == SDL_JOYBUTTONDOWN)
+                // Handle joy presses in menu (fire click down/up at current pos)
+                if (!jkGame_isDDraw && event.type == SDL_CONTROLLERBUTTONDOWN)
                 {
 					Window_bMouseLeft = 1;
 					pos = ((Window_mouseX) & 0xFFFF) | (((Window_mouseY) << 16) & 0xFFFF0000);
@@ -1303,7 +1303,7 @@ int Window_Main_Linux(int argc, char** argv)
 
     // Init SDL
     SDL_SetHint(SDL_HINT_NO_SIGNAL_HANDLERS, "1");
-    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK | SDL_INIT_NOPARACHUTE);
+    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER | SDL_INIT_NOPARACHUTE);
 
 #if defined(MACOS)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);

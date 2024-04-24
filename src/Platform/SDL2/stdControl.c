@@ -263,7 +263,7 @@ uint8_t stdControl_aDebounce[256];
 #define QUIRK_NINTENDO_TRIGGER_AXIS_TO_BUTTON (1)
 
 static uint32_t stdControl_aJoystickQuirks[JK_NUM_JOYSTICKS] = {0};
-static SDL_Joystick *pJoysticks[JK_NUM_JOYSTICKS] = {0};
+static SDL_GameController *pJoysticks[JK_NUM_JOYSTICKS] = {0};
 static int stdControl_aJoystickNumAxes[JK_NUM_JOYSTICKS] = {0};
 
 // Added: SDL2
@@ -286,7 +286,7 @@ void stdControl_FreeSdlJoysticks()
 {
     for (int i = 0; i < JK_NUM_JOYSTICKS; i++) {
         if (pJoysticks[i])
-            SDL_JoystickClose(pJoysticks[i]);
+            SDL_GameControllerClose(pJoysticks[i]);
         pJoysticks[i] = NULL;
     }
 
@@ -313,7 +313,8 @@ void stdControl_InitSdlJoysticks()
     for (int i = 0; i < numJoysticks; i++) {
         if (i >= JK_NUM_JOYSTICKS) break;
 
-        pJoysticks[i] = SDL_JoystickOpen(i);
+        if (SDL_IsGameController(i))
+            pJoysticks[i] = SDL_GameControllerOpen(i);
         if (!pJoysticks[i]) break;
 
         int numAxes = SDL_JoystickNumAxes(pJoysticks[i]);
