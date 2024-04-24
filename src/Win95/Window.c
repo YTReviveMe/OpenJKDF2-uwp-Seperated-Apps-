@@ -379,6 +379,8 @@ int Window_bMouseRight = 0;
 int Window_resized = 0;
 int Window_mouseX = 0;
 int Window_mouseY = 0;
+int Window_virtualMouseX = 0;
+int Window_virtualMouseY = 0;
 int Window_mouseWheelX = 0;
 int Window_mouseWheelY = 0;
 int Window_lastMouseX = 0;
@@ -390,30 +392,25 @@ int last_jkQuakeConsole_bOpen = 0;
 int Window_menu_mouseX = 0;
 int Window_menu_mouseY = 0;
 
+int Window_virtualMouseDX;
+int Window_virtualMouseDY;
+
 extern int jkGuiBuildMulti_bRendering;
 
 void Window_HandleJoyAxisMove(SDL_JoyAxisEvent* event) {
     if (event->axis == 0) {
-        if (abs(event->value) > 100) {
-            Window_lastXRel = event->value > 0 ? 10 : -10;
-            Window_mouseX += Window_lastXRel;
+        if (abs(event->value) > 2000) {
+            Window_virtualMouseDY = event->value > 0 ? -10 : 10;
         } else {
-            Window_lastXRel = 0;
+            Window_virtualMouseDY = 0;
         }
     } else if (event->axis == 1) {
-        if (abs(event->value) > 100) {
-            Window_lastYRel = event->value > 0 ? 10 : -10;
-            Window_mouseY += Window_lastYRel;
+        if (abs(event->value) > 2000) {
+            Window_virtualMouseDX = event->value > 0 ? 10 : -10;
         } else {
-            Window_lastYRel = 0;
-
+            Window_virtualMouseDX = 0;
         }
     }
-
-    uint32_t pos = ((400) & 0xFFFF) | (((400) << 16) & 0xFFFF0000);
-    Window_lastSampleMs = event->timestamp - Window_lastSampleTime;
-
-    Window_msg_main_handler(g_hWnd, WM_MOUSEMOVE, 0, pos);
 }
 
 void Window_HandleMouseMove(SDL_MouseMotionEvent *event)
@@ -1119,6 +1116,32 @@ void Window_SdlUpdate()
             SDL_SetRelativeMouseMode(SDL_FALSE);
         }
     }
+
+    if (Window_virtualMouseDX != 0 || Window_virtualMouseDY != 0) {
+        if (Window_virtualMouseDX != 0)
+            Window_virtualMouseX += Window_virtualMouseDX > 0 ? 5 : -5;
+
+        if (Window_virtualMouseDY != 0)
+            Window_virtualMouseY += Window_virtualMouseDY > 0 ? 5 : -5;
+
+        Window_virtualMouseX = stdMath_Clamp(Window_virtualMouseX, 0, Window_screenXSize);
+        Window_virtualMouseY = stdMath_Clamp(Window_virtualMouseY, 0, Window_screenYSize);
+
+        // TODO: This attempt at projection doesn't work
+        float fX = (float)Window_virtualMouseX;
+        float fY = (float)Window_virtualMouseY;
+
+        // Keep 4:3 aspect
+        float menu_x = ((float)Window_screenXSize - ((float)Window_screenYSize * (640.0 / 480.0))) / 2.0;
+        float menu_w = ((float)Window_screenYSize * (640.0 / 480.0));
+
+        Window_mouseX = (int)(((fX - menu_x) / (float)menu_w) * 640.0);
+        Window_mouseY = (int)((fY / (float)Window_screenYSize) * 480.0);
+
+        uint32_t pos = ((Window_mouseX) & 0xFFFF) | (((Window_mouseY) << 16) & 0xFFFF0000);
+        Window_msg_main_handler(g_hWnd, WM_MOUSEMOVE, 0, pos);
+    }
+
 
     jkPlayer_enableVsync_last = jkPlayer_enableVsync;
 

@@ -19,7 +19,10 @@ int Video_SetVideoDesc(const void *color_buf);
 #ifdef SDL2_RENDER
 extern rdCanvas* Video_pCanvasOverlayMap;
 extern stdVBuffer* Video_pOverlayMapBuffer;
+extern stdVBuffer* Video_pCursorBuf;
+extern stdVBuffer Video_cursorBuf;
 extern stdVBuffer Video_overlayMapBuffer;
+extern uint32_t Video_cursorTexId;
 extern uint32_t Video_overlayTexId;
 #endif
 

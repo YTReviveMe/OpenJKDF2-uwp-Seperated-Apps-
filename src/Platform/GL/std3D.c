@@ -96,7 +96,6 @@ typedef struct std3DFramebuffer
     int32_t h;
 } std3DFramebuffer;
 
-static int mouseX, mouseY;
 SDL_Surface* cursorSurface;
 GLint std3D_windowFbo = 0;
 std3DFramebuffer std3D_framebuffers[2];
@@ -1346,12 +1345,6 @@ void std3D_DrawMenu()
     glBindTexture(GL_TEXTURE_2D, Video_menuTexId);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Video_menuBuffer.format.width, Video_menuBuffer.format.height, GL_RED, GL_UNSIGNED_BYTE, Video_menuBuffer.sdlSurface->pixels);
 
-    // This produces a "red" version of the cursor with no alpha I guess because the target texture is red?
-	//jkGuiRend_GetMousePos(&mouseX, &mouseY);
-    //glActiveTexture(GL_TEXTURE0 + cursorTex);
-    //glBindTexture(GL_TEXTURE_2D, cursorTex);
-    //glTexSubImage2D(GL_TEXTURE_2D, 0, mouseX, mouseY, 64, 64, GL_RGBA, GL_UNSIGNED_BYTE, cursorSurface->pixels);
-
     //GLushort data_elements[32 * 3];
     glActiveTexture(GL_TEXTURE0 + 1);
     glBindTexture(GL_TEXTURE_2D, displaypal_texture);
@@ -1451,17 +1444,143 @@ void std3D_DrawMenu()
     glDisableVertexAttribArray(programMenu_attribute_coord3d);
 
     std3D_DrawMapOverlay();
+    std3D_DrawSoftwareCursor();
     std3D_DrawUIRenderList();
-
-    
-    
 
     last_flags = 0;
 }
 
 void std3D_DrawSoftwareCursor()
 {
+    if (jkGame_isDDraw) return;
 
+    //glFlush();
+
+    glBindFramebuffer(GL_FRAMEBUFFER, std3D_windowFbo);
+    glDepthMask(GL_TRUE);
+    glCullFace(GL_FRONT);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthFunc(GL_ALWAYS);
+    glUseProgram(programMenu); // TODO: This corrupts the cursor a bit, need a custom prog that renders colors as-is
+
+    float menu_w = (double)Window_xSize;
+    float menu_h = (double)Window_ySize;
+
+    menu_w = Video_menuBuffer.format.width;
+    menu_h = Video_menuBuffer.format.height;
+
+    GL_tmpVerticesAmt = 0;
+    GL_tmpTrisAmt = 0;
+
+    // Main View
+    std3D_DrawMenuSubrect(0, 0, menu_w, menu_h, 0, 0, 0.0);
+
+    glActiveTexture(GL_TEXTURE0 + 4);
+    glBindTexture(GL_TEXTURE_2D, blank_tex);
+    glActiveTexture(GL_TEXTURE0 + 3);
+    glBindTexture(GL_TEXTURE_2D, blank_tex);
+    glActiveTexture(GL_TEXTURE0 + 2);
+    glBindTexture(GL_TEXTURE_2D, blank_tex);
+    glActiveTexture(GL_TEXTURE0 + 1);
+    glBindTexture(GL_TEXTURE_2D, blank_tex);
+    glActiveTexture(GL_TEXTURE0 + 0);
+    glBindTexture(GL_TEXTURE_2D, blank_tex);
+    
+    // Software cursor inject
+    glActiveTexture(GL_TEXTURE0 + 0);
+    glBindTexture(GL_TEXTURE_2D, Video_cursorTexId);
+    //glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_BGRA, GL_UNSIGNED_BYTE, &emptyData[0]);
+    glClearTexImage(Video_cursorTexId, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+
+    glTexSubImage2D(GL_TEXTURE_2D, 0, Window_virtualMouseX, Window_virtualMouseY, 64, 64, GL_RGBA, GL_UNSIGNED_BYTE, cursorSurface->pixels);
+
+    glActiveTexture(GL_TEXTURE0 + 1);
+    glBindTexture(GL_TEXTURE_2D, displaypal_texture);
+
+    glActiveTexture(GL_TEXTURE0 + 0);
+    glUniform1i(programMenu_uniform_tex, 0);
+    glUniform1i(programMenu_uniform_displayPalette, 1);
+
+    D3DVERTEX* vertexes = GL_tmpVertices;
+    glBindBuffer(GL_ARRAY_BUFFER, menu_vbo_all);
+    glBufferData(GL_ARRAY_BUFFER, GL_tmpVerticesAmt * sizeof(D3DVERTEX), GL_tmpVertices, GL_STREAM_DRAW);
+    glVertexAttribPointer(
+        programMenu_attribute_coord3d, // attribute
+        3,                 // number of elements per vertex, here (x,y,z)
+        GL_FLOAT,          // the type of each element
+        GL_FALSE,          // normalize fixed-point data?
+        sizeof(D3DVERTEX),                 // data stride
+        (GLvoid*)offsetof(D3DVERTEX, x)                  // offset of first element
+    );
+
+    glVertexAttribPointer(
+        programMenu_attribute_v_color, // attribute
+        4,                 // number of elements per vertex, here (R,G,B,A)
+        GL_UNSIGNED_BYTE,  // the type of each element
+        GL_TRUE,          // normalize fixed-point data?
+        sizeof(D3DVERTEX),                 // no extra data between each position
+        (GLvoid*)offsetof(D3DVERTEX, color) // offset of first element
+    );
+
+    glVertexAttribPointer(
+        programMenu_attribute_v_uv,    // attribute
+        2,                 // number of elements per vertex, here (U,V)
+        GL_FLOAT,          // the type of each element
+        GL_FALSE,          // take our values as-is
+        sizeof(D3DVERTEX),                 // no extra data between each position
+        (GLvoid*)offsetof(D3DVERTEX, tu)                  // offset of first element
+    );
+
+    glEnableVertexAttribArray(programMenu_attribute_coord3d);
+    glEnableVertexAttribArray(programMenu_attribute_v_color);
+    glEnableVertexAttribArray(programMenu_attribute_v_uv);
+
+
+    {
+
+    float maxX, maxY, scaleX, scaleY, width, height;
+
+    scaleX = 1.0/((double)Window_xSize / 2.0);
+    scaleY = 1.0/((double)Window_ySize / 2.0);
+    maxX = 1.0;
+    maxY = 1.0;
+    width = Window_xSize;
+    height = Window_ySize;
+
+    float d3dmat[16] = {
+       maxX*scaleX,      0,                                          0,      0, // right
+       0,                                       -maxY*scaleY,               0,      0, // up
+       0,                                       0,                                          1,     0, // forward
+       -(width/2)*scaleX,  (height/2)*scaleY,     -1,      1  // pos
+    };
+ 
+    glUniformMatrix4fv(programMenu_uniform_mvp, 1, GL_FALSE, d3dmat);
+    glViewport(0, 0, width, height);
+
+    }
+
+    rdTri* tris = GL_tmpTris;
+    
+    rdDDrawSurface* last_tex = (void*)-1;
+    int last_tex_idx = 0;
+    //GLushort* data_elements = malloc(sizeof(GLushort) * 3 * GL_tmpTrisAmt);
+    for (int j = 0; j < GL_tmpTrisAmt; j++)
+    {
+        menu_data_elements[(j*3)+0] = tris[j].v1;
+        menu_data_elements[(j*3)+1] = tris[j].v2;
+        menu_data_elements[(j*3)+2] = tris[j].v3;
+    }
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, menu_ibo_triangle);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, GL_tmpTrisAmt * 3 * sizeof(GLushort), menu_data_elements, GL_STREAM_DRAW);
+
+    int tris_size = 0;
+    glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &tris_size);
+    glDrawElements(GL_TRIANGLES, tris_size / sizeof(GLushort), GL_UNSIGNED_SHORT, 0);
+
+    glDisableVertexAttribArray(programMenu_attribute_v_uv);
+    glDisableVertexAttribArray(programMenu_attribute_v_color);
+    glDisableVertexAttribArray(programMenu_attribute_coord3d);
 }
 
 void std3D_DrawMapOverlay()
@@ -1504,19 +1623,11 @@ void std3D_DrawMapOverlay()
     
     if (!jkGame_isDDraw)
     {
-        // Software cursor inject
-        jkGuiRend_GetMousePos(&mouseX, &mouseY);
-        glActiveTexture(GL_TEXTURE0 + 0);
-        glBindTexture(GL_TEXTURE_2D, Video_overlayTexId);
-        glTexSubImage2D(GL_TEXTURE_2D, 0, mouseX, mouseY, 64, 64, GL_RGBA, GL_UNSIGNED_BYTE, cursorSurface->pixels);
-
+        return;
     }
-    else
-    {
-        glActiveTexture(GL_TEXTURE0 + 0);
-        glBindTexture(GL_TEXTURE_2D, Video_overlayTexId);
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Video_overlayMapBuffer.format.width, Video_overlayMapBuffer.format.height, GL_RED, GL_UNSIGNED_BYTE, Video_overlayMapBuffer.sdlSurface->pixels);
-    }
+	glActiveTexture(GL_TEXTURE0 + 0);
+	glBindTexture(GL_TEXTURE_2D, Video_overlayTexId);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Video_overlayMapBuffer.format.width, Video_overlayMapBuffer.format.height, GL_RED, GL_UNSIGNED_BYTE, Video_overlayMapBuffer.sdlSurface->pixels);
 
     glActiveTexture(GL_TEXTURE0 + 1);
     glBindTexture(GL_TEXTURE_2D, displaypal_texture);

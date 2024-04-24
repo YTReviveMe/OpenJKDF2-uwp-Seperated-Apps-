@@ -20,6 +20,8 @@
 
 extern int Window_xSize;
 extern int Window_ySize;
+extern int Window_virtualMouseX;
+extern int Window_virtualMouseY;
 
 int Window_AddMsgHandler(WindowHandler_t a1);
 int Window_RemoveMsgHandler(WindowHandler_t a1);
