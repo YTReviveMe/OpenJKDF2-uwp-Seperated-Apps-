@@ -1489,9 +1489,7 @@ void std3D_DrawSoftwareCursor()
     // Software cursor inject
     glActiveTexture(GL_TEXTURE0 + 0);
     glBindTexture(GL_TEXTURE_2D, Video_cursorTexId);
-    //glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_BGRA, GL_UNSIGNED_BYTE, &emptyData[0]);
     glClearTexImage(Video_cursorTexId, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-
     glTexSubImage2D(GL_TEXTURE_2D, 0, Window_virtualMouseX, Window_virtualMouseY, 64, 64, GL_RGBA, GL_UNSIGNED_BYTE, cursorSurface->pixels);
 
     glActiveTexture(GL_TEXTURE0 + 1);

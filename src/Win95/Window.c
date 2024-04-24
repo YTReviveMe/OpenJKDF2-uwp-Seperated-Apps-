@@ -1,5 +1,6 @@
 #include "Window.h"
 
+#include "General/stdMath.h"
 #include "Win95/stdGdi.h"
 #include "Platform/std3D.h"
 #include "Main/Main.h"
@@ -392,8 +393,8 @@ int last_jkQuakeConsole_bOpen = 0;
 int Window_menu_mouseX = 0;
 int Window_menu_mouseY = 0;
 
-int Window_virtualMouseDX;
-int Window_virtualMouseDY;
+int Window_virtualMouseDX = 0;
+int Window_virtualMouseDY = 0;
 
 extern int jkGuiBuildMulti_bRendering;
 
@@ -1124,21 +1125,12 @@ void Window_SdlUpdate()
         if (Window_virtualMouseDY != 0)
             Window_virtualMouseY += Window_virtualMouseDY > 0 ? 5 : -5;
 
-        Window_virtualMouseX = stdMath_Clamp(Window_virtualMouseX, 0, Window_screenXSize);
-        Window_virtualMouseY = stdMath_Clamp(Window_virtualMouseY, 0, Window_screenYSize);
+        Window_virtualMouseX = stdMath_Clamp(Window_virtualMouseX, 0, 640);
+        Window_virtualMouseY = stdMath_Clamp(Window_virtualMouseY, 0, 480 - 64); // TODO: mouse cursor is getting culled when it overflows y range, haven't determined cause yet
+        Window_mouseX = Window_virtualMouseX;
+        Window_mouseY = Window_virtualMouseY;
 
-        // TODO: This attempt at projection doesn't work
-        float fX = (float)Window_virtualMouseX;
-        float fY = (float)Window_virtualMouseY;
-
-        // Keep 4:3 aspect
-        float menu_x = ((float)Window_screenXSize - ((float)Window_screenYSize * (640.0 / 480.0))) / 2.0;
-        float menu_w = ((float)Window_screenYSize * (640.0 / 480.0));
-
-        Window_mouseX = (int)(((fX - menu_x) / (float)menu_w) * 640.0);
-        Window_mouseY = (int)((fY / (float)Window_screenYSize) * 480.0);
-
-        uint32_t pos = ((Window_mouseX) & 0xFFFF) | (((Window_mouseY) << 16) & 0xFFFF0000);
+        uint32_t pos = ((Window_mouseX + 32) & 0xFFFF) | (((Window_mouseY + 32) << 16) & 0xFFFF0000);
         Window_msg_main_handler(g_hWnd, WM_MOUSEMOVE, 0, pos);
     }
 

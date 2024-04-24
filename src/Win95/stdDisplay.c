@@ -188,7 +188,7 @@ int stdDisplay_SetMode(unsigned int modeIdx, const void *palette, int paged)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, newW, newH, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); // Create empty texture we'll blit cursor over into it
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 640, 480, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); // Create empty texture we'll blit cursor over into it
     
     glGenTextures(1, &Video_menuTexId);
     glBindTexture(GL_TEXTURE_2D, Video_menuTexId);
