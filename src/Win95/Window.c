@@ -961,7 +961,7 @@ void Window_SdlUpdate()
                 }
 
                 // Handle joy presses in menu (fire click down/up at current pos)
-                if (!jkGame_isDDraw && event.type == SDL_CONTROLLERBUTTONDOWN)
+                else if (!jkGame_isDDraw && event.type == SDL_CONTROLLERBUTTONDOWN)
                 {
 					Window_bMouseLeft = 1;
 					pos = ((Window_mouseX) & 0xFFFF) | (((Window_mouseY) << 16) & 0xFFFF0000);
@@ -1118,13 +1118,14 @@ void Window_SdlUpdate()
             SDL_SetRelativeMouseMode(SDL_FALSE);
         }
     }
+#define CONSTANT_MOUSE_SPEED  3
 
     if (Window_virtualMouseDX != 0 || Window_virtualMouseDY != 0) {
         if (Window_virtualMouseDX != 0)
-            Window_virtualMouseX += Window_virtualMouseDX > 0 ? 5 : -5;
+            Window_virtualMouseX += Window_virtualMouseDX > 0 ?  CONSTANT_MOUSE_SPEED : -CONSTANT_MOUSE_SPEED;
 
         if (Window_virtualMouseDY != 0)
-            Window_virtualMouseY += Window_virtualMouseDY > 0 ? 5 : -5;
+            Window_virtualMouseY += Window_virtualMouseDY > 0 ? CONSTANT_MOUSE_SPEED : -CONSTANT_MOUSE_SPEED;
 
         Window_virtualMouseX = stdMath_Clamp(Window_virtualMouseX, 0, 640);
         Window_virtualMouseY = stdMath_Clamp(Window_virtualMouseY, 0, 480 - 64); // TODO: mouse cursor is getting culled when it overflows y range, haven't determined cause yet
@@ -1280,7 +1281,7 @@ void Window_RecreateSDL2Window()
 
     SDL_GL_MakeCurrent(displayWindow, glWindowContext);
     SDL_GL_SetSwapInterval(jkPlayer_enableVsync); // Disable vsync
-    SDL_StartTextInput();
+    //SDL_StartTextInput();  // This shows onscreen keys for uwp
 
     SDL_GL_GetDrawableSize(displayWindow, &Window_xSize, &Window_ySize);
     SDL_GetWindowSize(displayWindow, &Window_screenXSize, &Window_screenYSize);

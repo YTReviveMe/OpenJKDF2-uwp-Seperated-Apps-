@@ -317,9 +317,9 @@ void stdControl_InitSdlJoysticks()
             pJoysticks[i] = SDL_GameControllerOpen(i);
         if (!pJoysticks[i]) break;
 
-        int numAxes = SDL_JoystickNumAxes(pJoysticks[i]);
-        int numButtons = SDL_JoystickNumButtons(pJoysticks[i]);
-        int numHats = SDL_JoystickNumHats(pJoysticks[i]);
+        int numAxes = SDL_JoystickNumAxes(SDL_GameControllerGetJoystick(pJoysticks[i]));
+        int numButtons = SDL_JoystickNumButtons(SDL_GameControllerGetJoystick(pJoysticks[i]));
+        int numHats = SDL_JoystickNumHats(SDL_GameControllerGetJoystick(pJoysticks[i]));
 
         stdPlatform_Printf("SDL Joystick %u: %s, %u axes %u buttons %u hats\n", i, SDL_JoystickNameForIndex(i), numAxes, numButtons, numHats);
         if (numButtons > JK_JOYSTICK_BUTTON_STRIDE + JK_JOYSTICK_EXT_BUTTON_STRIDE) {
@@ -746,7 +746,7 @@ void stdControl_ReadControls()
             
             for (int j = 0; j < JK_JOYSTICK_AXIS_STRIDE; j++)
             {
-                int val = SDL_JoystickGetAxis(pJoysticks[i],j);
+                int val = SDL_GameControllerGetAxis(pJoysticks[i],j);
                 //printf("%u: %d\n", j, val);
                 stdControl_aAxisPos[(JK_JOYSTICK_AXIS_STRIDE * i) + j] = val;
             }
@@ -758,14 +758,14 @@ void stdControl_ReadControls()
             
             for (int j = 0; j < JK_NUM_JOY_BUTTONS + JK_NUM_EXT_JOY_BUTTONS; ++j )
             {
-                int val = SDL_JoystickGetButton(pJoysticks[i], j);
+                int val = SDL_GameControllerGetButton(pJoysticks[i], j);
 
                 if (quirks & QUIRK_NINTENDO_TRIGGER_AXIS_TO_BUTTON) {
                     if (j == 15) { // Capture
-                        val = SDL_JoystickGetAxis(pJoysticks[i],4) > 0;
+                        val = SDL_GameControllerGetAxis(pJoysticks[i],4) > 0;
                     }
                     else if (j == 5) { // Home
-                        val = SDL_JoystickGetAxis(pJoysticks[i],5) > 0;
+                        val = SDL_GameControllerGetAxis(pJoysticks[i],5) > 0;
                     }
                 }
 
@@ -773,10 +773,10 @@ void stdControl_ReadControls()
                     int axisButtonNum = (j - numRealButtons);
                     int axisNum = axisButtonNum / 2;
                     if (axisButtonNum & 1) {
-                        val = !!(SDL_JoystickGetAxis(pJoysticks[i], axisNum) < SDL2_MIN_BINARY_THRESH);
+                        val = !!(SDL_GameControllerGetAxis(pJoysticks[i], axisNum) < SDL2_MIN_BINARY_THRESH);
                     }
                     else {
-                        val = !!(SDL_JoystickGetAxis(pJoysticks[i], axisNum) > SDL2_MAX_BINARY_THRESH);
+                        val = !!(SDL_GameControllerGetAxis(pJoysticks[i], axisNum) > SDL2_MAX_BINARY_THRESH);
                     }
                 }
                 

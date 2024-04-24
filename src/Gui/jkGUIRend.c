@@ -16,6 +16,8 @@
 #include "jk.h"
 #include "types.h"
 
+#include "SDL.h"
+
 #include <math.h>
 
 static char *jkGuiRend_LoadedSounds[4] = {0};
@@ -828,6 +830,10 @@ int jkGuiRend_InvokeEvent(jkGuiElement *element, jkGuiMenu *menu, int eventType,
 
 int jkGuiRend_InvokeClicked(jkGuiElement *clickable, jkGuiMenu *menu, int mouseX, int mouseY, BOOL redraw)
 {
+    if (clickable->type == ELEMENT_TEXTBOX) {
+        SDL_StartTextInput();
+    }
+
     jkGuiClickHandlerFunc_t handler;
 
     if ( !clickable->bIsVisible || clickable->enableHover )
