@@ -393,21 +393,21 @@ int last_jkQuakeConsole_bOpen = 0;
 int Window_menu_mouseX = 0;
 int Window_menu_mouseY = 0;
 
-int Window_virtualMouseDX = 0;
-int Window_virtualMouseDY = 0;
+float Window_virtualMouseDX = 0;
+float Window_virtualMouseDY = 0;
 
 extern int jkGuiBuildMulti_bRendering;
 
 void Window_HandleJoyAxisMove(SDL_JoyAxisEvent* event) {
     if (event->axis == SDL_CONTROLLER_AXIS_LEFTY) {
         if (abs(event->value) > 2000) {
-            Window_virtualMouseDY = event->value > 0 ? 10 : -10;
+            Window_virtualMouseDY = (float) event->value / SHRT_MAX;
         } else {
             Window_virtualMouseDY = 0;
         }
     } else if (event->axis == SDL_CONTROLLER_AXIS_LEFTX) {
         if (abs(event->value) > 2000) {
-            Window_virtualMouseDX = event->value > 0 ? 10 : -10;
+            Window_virtualMouseDX = (float) event->value / SHRT_MAX;
         } else {
             Window_virtualMouseDX = 0;
         }
@@ -1118,14 +1118,14 @@ void Window_SdlUpdate()
             SDL_SetRelativeMouseMode(SDL_FALSE);
         }
     }
-#define CONSTANT_MOUSE_SPEED  3
+#define MAX_MOUSE_SPEED 10
 
     if (Window_virtualMouseDX != 0 || Window_virtualMouseDY != 0) {
         if (Window_virtualMouseDX != 0)
-            Window_virtualMouseX += Window_virtualMouseDX > 0 ?  CONSTANT_MOUSE_SPEED : -CONSTANT_MOUSE_SPEED;
+            Window_virtualMouseX += Window_virtualMouseDX * MAX_MOUSE_SPEED;
 
         if (Window_virtualMouseDY != 0)
-            Window_virtualMouseY += Window_virtualMouseDY > 0 ? CONSTANT_MOUSE_SPEED : -CONSTANT_MOUSE_SPEED;
+            Window_virtualMouseY += Window_virtualMouseDY * MAX_MOUSE_SPEED;
 
         Window_virtualMouseX = stdMath_Clamp(Window_virtualMouseX, 0, 640 - 32);
         Window_virtualMouseY = stdMath_Clamp(Window_virtualMouseY, 0, 480 - 32); // TODO: mouse cursor is getting culled when it overflows y range, haven't determined cause yet
