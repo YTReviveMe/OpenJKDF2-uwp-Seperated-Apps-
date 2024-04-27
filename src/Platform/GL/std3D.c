@@ -1454,7 +1454,7 @@ void std3D_DrawMenu()
 
 void std3D_DrawSoftwareCursor()
 {
-    if (jkGame_isDDraw) return;
+    if (jkGame_isDDraw || jkCutscene_isRendering) return;
 
     //glFlush();
 
