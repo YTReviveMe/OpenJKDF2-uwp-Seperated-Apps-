@@ -249,8 +249,8 @@
 		C:\lib\libgallium_wgl.lib;
 		C:\lib\z.lib;
 		C:\dev\uwp\deps\SDL_image\lib\SDL_image.lib;
-		$(ProjectDir)\..\build_winrt\openal\Release\common.lib;
-		$(ProjectDir)\..\build_winrt\openal\Release\OpenAL32.lib;
+		$(ProjectDir)\..\build_winrt\openal\RelWithDebInfo\common.lib;
+		$(ProjectDir)\..\build_winrt\openal\RelWithDebInfo\OpenAL32.lib;
 		$(ProjectDir)\..\build_winrt\glew\lib\glew.lib;
 		$(ProjectDir)\..\build_winrt\zlib\Windows\AMD64\lib\zlibstatic.lib;
 		$(ProjectDir)\..\build_winrt\libpng\lib\libpng16_static.lib;
@@ -261,7 +261,7 @@
 		$(ProjectDir)\..\build_winrt\SDL_mixer\lib\vorbisfile.lib;
 		$(ProjectDir)\..\build_winrt\SDL_mixer\lib\SDL2_mixer-static.lib;
 		C:\dev\hdr\SDL-uwp-gl\VisualC-WinRT\x64\Release\SDL-UWP\SDL2.lib;
-		$(ProjectDir)\..\build_winrt\Release\openjkdf2-64.lib;
+		$(ProjectDir)\..\build_winrt\RelWithDebInfo\openjkdf2-64.lib;
 			    d3d12.lib;dxgi.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories); $(VCInstallDir)\lib\store\amd64; $(VCInstallDir)\lib\amd64</AdditionalLibraryDirectories>
     </Link>

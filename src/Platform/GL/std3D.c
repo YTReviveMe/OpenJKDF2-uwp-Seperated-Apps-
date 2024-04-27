@@ -660,11 +660,7 @@ int std3D_Startup()
 #endif
 
     // Init software cursor texture
-    GLubyte* cursorImage;
-    int cursorWidth, cursorHeight, hasAlpha;
-    // TODO: Need a helper to get app bundle path
-    cursorSurface = IMG_Load(wininfo_getBundlePath("cursor_small.png"));
-    //jkgm_load_png("Q:\\Users\\UserMgr0\\AppData\\Local\\Packages\\4892edf8-debd-49c0-a003-62355d8fa04d_vfvyvkbgajpwg\\LocalState\\cursor_small.png", &cursorWidth, &cursorHeight, &hasAlpha, &cursorImage, 0);
+    cursorSurface = IMG_Load("cursor_small.png");
 
     glGenTextures(1, &cursor_tex);
     glBindTexture(GL_TEXTURE_2D, cursor_tex);

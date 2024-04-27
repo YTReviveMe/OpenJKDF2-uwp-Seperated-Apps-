@@ -73,6 +73,8 @@ static int width, height;
 static double refreshRate;
 static float scale;
 
+const char* installPath = "E:\\df2";
+
 // wininfo impls
 char* wininfo_getBundlePath(char* filename)
 {
@@ -87,6 +89,11 @@ char* wininfo_getStatePath(char* filename)
     sprintf_s(path, 1024, "%s/%s", winrt::to_string(ApplicationData::Current().LocalFolder().Path()).c_str(), filename);
     return path;
 
+}
+
+void wininfo_getInstallPath(char* buffer)
+{
+    sprintf_s(buffer, 1024, installPath);
 }
 // end wininfo impls
 
