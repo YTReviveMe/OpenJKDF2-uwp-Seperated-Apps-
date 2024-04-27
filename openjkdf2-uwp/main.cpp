@@ -65,12 +65,30 @@ using namespace winrt::Windows::Storage;
 
 #include "SDL2/SDL.h"
 
+#include "../src/Platform/wininfo.h"
+
 // Window state vars
 static int width, height;
 
 static double refreshRate;
 static float scale;
 
+// wininfo impls
+char* wininfo_getBundlePath(char* filename)
+{
+    char path[1024];
+    sprintf_s(path, 1024, "%s/%s", winrt::to_string(ApplicationModel::Package::Current().InstalledPath()).c_str(), filename);
+    return path;
+}
+
+char* wininfo_getStatePath(char* filename)
+{
+    char path[1024];
+    sprintf_s(path, 1024, "%s/%s", winrt::to_string(ApplicationData::Current().LocalFolder().Path()).c_str(), filename);
+    return path;
+
+}
+// end wininfo impls
 
 int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {

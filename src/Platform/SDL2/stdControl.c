@@ -798,7 +798,8 @@ void stdControl_ReadControls()
             stdControl_SetKeydown((JK_JOYSTICK_BUTTON_STRIDE*i) + KEY_JOY1_HDOWN, !!(hatState & SDL_HAT_DOWN) /* button val */, stdControl_curReadTime);
         }
     }
-    stdControl_ReadMouse();
+    // No mouse read for UWP, it errors out and detects clicks
+    //stdControl_ReadMouse();
     stdControl_msLast = stdControl_curReadTime;
 }
 
