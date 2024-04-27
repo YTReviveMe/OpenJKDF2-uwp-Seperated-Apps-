@@ -36,6 +36,8 @@ __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 #define TEX_MODE_16BPP 5
 #define TEX_MODE_BILINEAR_16BPP 6
 
+#define CURSOR_TEX_SIZE 32
+
 typedef struct std3DSimpleTexStage
 {
     GLuint program;
@@ -664,7 +666,7 @@ int std3D_Startup()
 
     glGenTextures(1, &cursor_tex);
     glBindTexture(GL_TEXTURE_2D, cursor_tex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 64, 64, 0, GL_RGBA, GL_UNSIGNED_BYTE, cursorSurface->pixels);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, CURSOR_TEX_SIZE, CURSOR_TEX_SIZE, 0, GL_RGBA, GL_UNSIGNED_BYTE, cursorSurface->pixels);
     glBindTexture(GL_TEXTURE_2D, 0);
 
     memset(&std3D_ui_colormap, 0, sizeof(std3D_ui_colormap));
@@ -1490,7 +1492,7 @@ void std3D_DrawSoftwareCursor()
     glActiveTexture(GL_TEXTURE0 + 0);
     glBindTexture(GL_TEXTURE_2D, Video_cursorTexId);
     glClearTexImage(Video_cursorTexId, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, Window_virtualMouseX, Window_virtualMouseY, 64, 64, GL_RGBA, GL_UNSIGNED_BYTE, cursorSurface->pixels);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, Window_virtualMouseX, Window_virtualMouseY, CURSOR_TEX_SIZE, CURSOR_TEX_SIZE, GL_RGBA, GL_UNSIGNED_BYTE, cursorSurface->pixels);
 
     glActiveTexture(GL_TEXTURE0 + 1);
     glBindTexture(GL_TEXTURE_2D, displaypal_texture);

@@ -1127,12 +1127,12 @@ void Window_SdlUpdate()
         if (Window_virtualMouseDY != 0)
             Window_virtualMouseY += Window_virtualMouseDY > 0 ? CONSTANT_MOUSE_SPEED : -CONSTANT_MOUSE_SPEED;
 
-        Window_virtualMouseX = stdMath_Clamp(Window_virtualMouseX, 0, 640);
-        Window_virtualMouseY = stdMath_Clamp(Window_virtualMouseY, 0, 480 - 64); // TODO: mouse cursor is getting culled when it overflows y range, haven't determined cause yet
+        Window_virtualMouseX = stdMath_Clamp(Window_virtualMouseX, 0, 640 - 32);
+        Window_virtualMouseY = stdMath_Clamp(Window_virtualMouseY, 0, 480 - 32); // TODO: mouse cursor is getting culled when it overflows y range, haven't determined cause yet
         Window_mouseX = Window_virtualMouseX;
         Window_mouseY = Window_virtualMouseY;
 
-        uint32_t pos = ((Window_mouseX + 32) & 0xFFFF) | (((Window_mouseY + 32) << 16) & 0xFFFF0000);
+        uint32_t pos = ((Window_mouseX) & 0xFFFF) | (((Window_mouseY) << 16) & 0xFFFF0000);
         Window_msg_main_handler(g_hWnd, WM_MOUSEMOVE, 0, pos);
     }
 

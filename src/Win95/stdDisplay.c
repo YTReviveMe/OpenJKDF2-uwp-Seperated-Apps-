@@ -90,7 +90,6 @@ int stdDisplay_SetMode(unsigned int modeIdx, const void *palette, int paged)
     stdDisplay_pCurVideoMode->format.width = newW;
     stdDisplay_pCurVideoMode->format.height = newH;
     
-    _memcpy(&Video_cursorBuf.format, &stdDisplay_pCurVideoMode->format, sizeof(Video_cursorBuf.format));
     _memcpy(&Video_otherBuf.format, &stdDisplay_pCurVideoMode->format, sizeof(Video_otherBuf.format));
     _memcpy(&Video_menuBuffer.format, &stdDisplay_pCurVideoMode->format, sizeof(Video_menuBuffer.format));
     
@@ -102,8 +101,6 @@ int stdDisplay_SetMode(unsigned int modeIdx, const void *palette, int paged)
         glDeleteTextures(1, &Video_cursorTexId);
         glDeleteTextures(1, &Video_menuTexId);
         glDeleteTextures(1, &Video_overlayTexId);
-        if (Video_cursorBuf.sdlSurface)
-            SDL_FreeSurface(Video_cursorBuf.sdlSurface);
         if (Video_otherBuf.sdlSurface)
             SDL_FreeSurface(Video_otherBuf.sdlSurface);
         if (Video_menuBuffer.sdlSurface)
@@ -111,15 +108,12 @@ int stdDisplay_SetMode(unsigned int modeIdx, const void *palette, int paged)
         if (Video_overlayMapBuffer.sdlSurface)
             SDL_FreeSurface(Video_overlayMapBuffer.sdlSurface);
         
-        Video_cursorBuf.sdlSurface = 0;
         Video_otherBuf.sdlSurface = 0;
         Video_menuBuffer.sdlSurface = 0;
         Video_overlayMapBuffer.sdlSurface = 0;
     }
 
     
-    SDL_Surface* cursorSurface = SDL_CreateRGBSurface(0, 64, 64, 32, 0, 0, 0, 0);
-
     SDL_Surface* otherSurface = SDL_CreateRGBSurface(0, newW, newH, 8,
                                         0,
                                         0,
@@ -145,7 +139,6 @@ int stdDisplay_SetMode(unsigned int modeIdx, const void *palette, int paged)
             tmp[i].a = 0xFF;
         }
         
-        //SDL_SetPaletteColors(cursorSurface->format->palette, tmp, 0, 256);
         SDL_SetPaletteColors(otherSurface->format->palette, tmp, 0, 256);
         SDL_SetPaletteColors(menuSurface->format->palette, tmp, 0, 256);
         SDL_SetPaletteColors(overlaySurface->format->palette, tmp, 0, 256);
@@ -155,30 +148,24 @@ int stdDisplay_SetMode(unsigned int modeIdx, const void *palette, int paged)
     //SDL_SetSurfacePalette(otherSurface, palette);
     //SDL_SetSurfacePalette(menuSurface, palette);
     
-    Video_cursorBuf.sdlSurface = cursorSurface;
     Video_otherBuf.sdlSurface = otherSurface;
     Video_menuBuffer.sdlSurface = menuSurface;
     Video_overlayMapBuffer.sdlSurface = overlaySurface;
     
-    Video_cursorBuf.format.width_in_bytes = cursorSurface->pitch;
     Video_menuBuffer.format.width_in_bytes = menuSurface->pitch;
     Video_otherBuf.format.width_in_bytes = otherSurface->pitch;
     Video_overlayMapBuffer.format.width_in_bytes = overlaySurface->pitch;
     
-    Video_cursorBuf.format.width_in_pixels = cursorSurface->pitch;
     Video_menuBuffer.format.width_in_pixels = menuSurface->pitch;
     Video_otherBuf.format.width_in_pixels = otherSurface->pitch;
     Video_overlayMapBuffer.format.width_in_pixels = overlaySurface->pitch;
-    Video_cursorBuf.format.width = newW;
     Video_menuBuffer.format.width = newW;
     Video_otherBuf.format.width = newW;
     Video_overlayMapBuffer.format.width = newW;
-    Video_cursorBuf.format.height = newH;
     Video_menuBuffer.format.height = newH;
     Video_otherBuf.format.height = newH;
     Video_overlayMapBuffer.format.height = newH;
     
-    Video_cursorBuf.format.format.bpp = 32;
     Video_menuBuffer.format.format.bpp = 8;
     Video_otherBuf.format.format.bpp = 8;
     Video_overlayMapBuffer.format.format.bpp = 8;
