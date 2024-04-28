@@ -691,7 +691,7 @@ int std3D_Startup()
 #endif
 
     // Init software cursor texture
-    cursorSurface = IMG_Load("cursor_small.png");
+    cursorSurface = IMG_Load(wininfo_cursorPath);
 
     glGenTextures(1, &cursor_tex);
     glBindTexture(GL_TEXTURE_2D, cursor_tex);

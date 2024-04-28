@@ -76,18 +76,14 @@ static float scale;
 const char* installPath = "E:\\df2";
 
 // wininfo impls
-char* wininfo_getBundlePath(char* filename)
+void wininfo_getBundlePath(char* buffer, char* filename)
 {
-    char path[1024];
-    sprintf_s(path, 1024, "%s/%s", winrt::to_string(ApplicationModel::Package::Current().InstalledPath()).c_str(), filename);
-    return path;
+    sprintf_s(buffer, 1024, "%s/%s", winrt::to_string(ApplicationModel::Package::Current().InstalledPath()).c_str(), filename);
 }
 
-char* wininfo_getStatePath(char* filename)
+void wininfo_getStatePath(char* buffer, char* filename)
 {
-    char path[1024];
-    sprintf_s(path, 1024, "%s/%s", winrt::to_string(ApplicationData::Current().LocalFolder().Path()).c_str(), filename);
-    return path;
+    sprintf_s(buffer, 1024, "%s/%s", winrt::to_string(ApplicationData::Current().LocalFolder().Path()).c_str(), filename);
 
 }
 
