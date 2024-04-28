@@ -774,7 +774,7 @@ void stdControl_ReadControls()
                     }
                 }
 
-                if (j >= numRealButtons && j < numButtons) {
+                if (j > numRealButtons && j < numButtons) {
                     int axisButtonNum = (j - numRealButtons);
                     int axisNum = axisButtonNum / 2;
                     if (axisButtonNum & 1) {
