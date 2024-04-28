@@ -15,15 +15,15 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "Platform/GL/shader_utils.h"
 #include "Platform/GL/jkgm.h"
 
 #include "SDL2_helper.h"
-extern __declspec(dllimport) SDL_Surface * IMG_Load(const char* file);
 
 #include "Gui/jkGUIRend.h"
 
 #include "../wininfo.h"
+
+extern __declspec(dllimport) SDL_Surface * IMG_Load(const char* file);
 
 #ifdef WIN32
 #include <Windows.h>
@@ -112,7 +112,7 @@ static void* last_overlay = NULL;
 static int std3D_activeFb = 1;
 
 int init_once = 0;
-GLuint programDefault, programMenu;
+GLuint programDefault, programMenu, programCursor;
 GLint attribute_coord3d, attribute_v_color, attribute_v_light, attribute_v_uv, attribute_v_norm;
 GLint uniform_mvp, uniform_tex, uniform_texEmiss, uniform_displacement_map, uniform_tex_mode, uniform_blend_mode, uniform_worldPalette, uniform_worldPaletteLights;
 GLint uniform_tint, uniform_filter, uniform_fade, uniform_add, uniform_emissiveFactor, uniform_albedoFactor;
@@ -476,7 +476,38 @@ int init_resources()
 
     std3D_activeFb = 1;
     std3D_pFb = &std3D_framebuffers[0];
-    
+
+    // TODO: Maybe move this somewhere else, this is a no-op shader to show the cursor without any malarky
+    // Modded menu shader with pallette blending removed
+    const char* noopShaderSource =
+    "uniform sampler2D tex;\n"
+    "uniform sampler2D worldPalette;\n"
+    "uniform sampler2D displayPalette;\n"
+    "in vec4 f_color;\n"
+    "in vec2 f_uv;\n"
+    "out vec4 fragColor;\n"
+    "void main(void)\n"
+    "{\n"
+    "    vec4 sampled = texture(tex, f_uv);\n"
+	"	 fragColor = sampled;\n"
+    "}\0";
+
+    GLint link_ok = GL_FALSE;
+    GLuint vert = load_shader_file("shaders/menu_v.glsl", GL_VERTEX_SHADER);
+    //GLuint frag = load_shader_file("shaders/menu_f.glsl", GL_FRAGMENT_SHADER);
+    GLuint noop = create_shader(noopShaderSource, GL_FRAGMENT_SHADER);
+
+    programCursor = glCreateProgram();
+    glAttachShader(programCursor, vert);
+    glAttachShader(programCursor, noop);
+    glLinkProgram(programCursor);
+    glGetProgramiv(programCursor, GL_LINK_STATUS, &link_ok);
+    if (!link_ok)
+    {
+        print_log(programCursor);
+        return false;
+    }
+
     if ((programDefault = std3D_loadProgram("shaders/default")) == 0) return false;
     if ((programMenu = std3D_loadProgram("shaders/menu")) == 0) return false;
     if (!std3D_loadSimpleTexProgram("shaders/ui", &std3D_uiProgram)) return false;
@@ -1461,7 +1492,7 @@ void std3D_DrawSoftwareCursor()
     glCullFace(GL_FRONT);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDepthFunc(GL_ALWAYS);
-    glUseProgram(programMenu); // TODO: This corrupts the cursor a bit, need a custom prog that renders colors as-is
+    glUseProgram(programCursor); // programCursor renders textures without pallette blends
 
     float menu_w = (double)Window_xSize;
     float menu_h = (double)Window_ySize;
