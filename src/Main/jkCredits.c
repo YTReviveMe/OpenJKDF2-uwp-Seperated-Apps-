@@ -170,7 +170,8 @@ LABEL_19:
         v12 += 3;
     }
     while ( (intptr_t)v12 < (intptr_t)&jkCredits_aPalette[0x300] );
-    stdDisplay_SetMasterPalette(jkCredits_aPalette);
+    // TODO: Palette init above is producing all zeroes on UWP, commenting out line below at least maintains some visuals of credits
+    //stdDisplay_SetMasterPalette(jkCredits_aPalette);
     v15 = stdDisplay_VBufferNew(&Video_menuBuffer.format, 1, 1, jkCredits_aPalette);
     _memcpy(&v26, &Video_menuBuffer.format, sizeof(v26));
     jkCredits_pVbuffer = v15;
