@@ -1629,7 +1629,10 @@ void std3D_DrawMapOverlay()
     float menu_w = (double)Window_xSize;
     float menu_h = (double)Window_ySize;
 
-    
+    if (!jkGame_isDDraw)
+    {
+        return;
+    }
 
     menu_w = Video_menuBuffer.format.width;
     menu_h = Video_menuBuffer.format.height;
@@ -1651,13 +1654,9 @@ void std3D_DrawMapOverlay()
     glActiveTexture(GL_TEXTURE0 + 0);
     glBindTexture(GL_TEXTURE_2D, blank_tex);
     
-    if (!jkGame_isDDraw)
-    {
-        return;
-    }
-	glActiveTexture(GL_TEXTURE0 + 0);
-	glBindTexture(GL_TEXTURE_2D, Video_overlayTexId);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Video_overlayMapBuffer.format.width, Video_overlayMapBuffer.format.height, GL_RED, GL_UNSIGNED_BYTE, Video_overlayMapBuffer.sdlSurface->pixels);
+    glActiveTexture(GL_TEXTURE0 + 0);
+    glBindTexture(GL_TEXTURE_2D, Video_overlayTexId);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Video_overlayMapBuffer.format.width, Video_overlayMapBuffer.format.height, GL_RED, GL_UNSIGNED_BYTE, Video_overlayMapBuffer.sdlSurface->pixels);
 
     glActiveTexture(GL_TEXTURE0 + 1);
     glBindTexture(GL_TEXTURE_2D, displaypal_texture);
