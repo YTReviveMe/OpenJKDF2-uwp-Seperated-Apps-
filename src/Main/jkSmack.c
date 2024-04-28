@@ -58,7 +58,7 @@ int jkSmack_SmackPlay(const char *fname)
         jkSmack_nextGuiState = JK_GAMEMODE_TITLE;
         return 1;
     }
-    _sprintf(std_genBuffer, "%s%cResource%cvideo%c%s", installPath, LEC_PATH_SEPARATOR_CHR, LEC_PATH_SEPARATOR_CHR, LEC_PATH_SEPARATOR_CHR, fname);
+    _sprintf(std_genBuffer, "video%c%s", LEC_PATH_SEPARATOR_CHR, fname);
 
 #ifdef FS_POSIX
     char *r = malloc(strlen(std_genBuffer) + 16);
