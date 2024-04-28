@@ -723,6 +723,7 @@ void std3D_FreeResources()
 {
     std3D_PurgeTextureCache();
 
+    glDeleteProgram(programCursor);
     glDeleteProgram(programDefault);
     glDeleteProgram(programMenu);
     std3D_deleteFramebuffer(&std3D_framebuffers[0]);
