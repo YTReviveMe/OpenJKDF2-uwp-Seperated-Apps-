@@ -353,6 +353,11 @@ void stdControl_InitSdlJoysticks()
     }
 }
 
+void stdControl_GetLabelForButton(int button, wchar_t* buffer)
+{
+    swprintf_s(buffer, 256, L"%hs", SDL_GameControllerGetStringForButton(button));
+}
+
 int stdControl_Startup()
 {
     //UINT v0; // ebp

@@ -38,14 +38,15 @@ static int jkGuiJoystick_dword_536B98 = -1;
 static int jkGuiJoystick_dword_536B9C = -1;
 
 // Added: Changed the bitfield to give button numbers 8 bits instead of 4
+// DLW: Manually set names for analog axis, updated code further below to pull button names from SDL
 static jkGuiJoystickEntry jkGuiJoystick_aEntries[JKGUIJOYSTICK_NUM_ENTRIES] =
 {
-    { AXIS_JOY1_X,      "AXIS_JOY1_X",      0, INPUT_FUNC_FORWARD, 0u, NULL, 0,  0.0 },
-    { AXIS_JOY1_Y,      "AXIS_JOY1_Y",      1, INPUT_FUNC_FORWARD, 0u, NULL, 0,  0.0 },
-    { AXIS_JOY1_Z,      "AXIS_JOY1_Z",      2, INPUT_FUNC_FORWARD, 0u, NULL, 0,  0.0 },
-    { AXIS_JOY1_R,      "AXIS_JOY1_R",      3, INPUT_FUNC_FORWARD, 0u, NULL, 0,  0.0 },
-    { AXIS_JOY1_U,      "AXIS_JOY1_U",      4, INPUT_FUNC_FORWARD, 0u, NULL, 0,  0.0 },
-    { AXIS_JOY1_V,      "AXIS_JOY1_V",      5, INPUT_FUNC_FORWARD, 0u, NULL, 0,  0.0 },
+    { AXIS_JOY1_X,      "Left Stick X",      0, INPUT_FUNC_FORWARD, 0u, NULL, 0,  0.0 },
+    { AXIS_JOY1_Y,      "Left Stick Y",      1, INPUT_FUNC_FORWARD, 0u, NULL, 0,  0.0 },
+    { AXIS_JOY1_Z,      "Right Stick X",     2, INPUT_FUNC_FORWARD, 0u, NULL, 0,  0.0 },
+    { AXIS_JOY1_R,      "Right Stick Y",     3, INPUT_FUNC_FORWARD, 0u, NULL, 0,  0.0 },
+    { AXIS_JOY1_U,      "Left Trigger",      4, INPUT_FUNC_FORWARD, 0u, NULL, 0,  0.0 },
+    { AXIS_JOY1_V,      "Right Trigger",     5, INPUT_FUNC_FORWARD, 0u, NULL, 0,  0.0 },
 
     { AXIS_JOY2_X,      "AXIS_JOY2_X",      0x800, INPUT_FUNC_FORWARD, 0u, NULL, 0,  0.0 },
     { AXIS_JOY2_Y,      "AXIS_JOY2_Y",      0x801, INPUT_FUNC_FORWARD, 0u, NULL, 0,  0.0 },
@@ -492,6 +493,8 @@ void jkGuiJoystick_sub_41B390()
     int v7; // [esp+10h] [ebp-208h]
     int v8; // [esp+14h] [ebp-204h]
     wchar_t wtmp[256]; // [esp+18h] [ebp-200h] BYREF
+    wchar_t btnBfr[256];
+    int joyBtn;
 
     jkGuiRend_DarrayFreeEntry(&jkGuiJoystick_darray2);
     jkGuiRend_DarrayFreeEntry(&jkGuiJoystick_darray);
@@ -515,7 +518,26 @@ void jkGuiJoystick_sub_41B390()
         v2 = v1->keybits & 0xFF; // Added: 4bit -> 8bit
         v8 = v1->keybits & 0x300; // Added: 4bit -> 8bit
         v3 = v1->keybits & 0x800; // Added: 4bit -> 8bit
-        v4 = jkStrings_GetUniStringWithFallback(v1->displayStrKey);
+        if (v1->dikNum >= JK_EXTENDED_KEY_START) {
+            if (v1->dikNum >= KEY_JOY1_B9) {
+                joyBtn = (v1->dikNum - KEY_JOY1_B9) + KEY_JOY1_B8 - JK_EXTENDED_KEY_START + 1;
+            }
+            else {
+                joyBtn = v1->dikNum - JK_EXTENDED_KEY_START;
+            }
+
+            stdControl_GetLabelForButton(joyBtn, btnBfr);
+            if (!strstr(btnBfr, L"(null)")) {
+                btnBfr[0] = toupper(btnBfr[0]);
+                v4 = btnBfr;
+            }
+            else {
+                v4 = jkStrings_GetUniStringWithFallback(v1->displayStrKey);
+            }
+        }
+        else {
+            v4 = jkStrings_GetUniStringWithFallback(v1->displayStrKey);
+        }
         if ( v1->inputFunc == -1 )
         {
             v5 = L"--";
